@@ -27,6 +27,13 @@ Macintosh
     sudo pip install ansible
 
 
+## Add hock commands to do basic functionality testing
+
+ansible <hostgroup> -a "/usr/bin/uptime -u <someusername> --become [--ask-become-pass]
+
+ansible webservers -m git -a "repo=https://foo.example.org/repo.git dest=/srv/myapp version=HEAD"
+
+
 ## Inventory
 
 If the location given to -i in Ansible is a directory (or as so configured in ansible.cfg), Ansible can use multiple inventory sources at the same time. When doing so, it is possible to mix both dynamic and statically managed inventory sources in the same ansible run. Instant hybrid cloud!
