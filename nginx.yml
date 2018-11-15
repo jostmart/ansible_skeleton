@@ -5,6 +5,15 @@
   become: true
 
   tasks:
+
+  - name: Create Nginx container
+    docker_container:
+      name: {{ item.name }}
+      image: {{ item.image }}
+      ports: {{ item.ports }}
+      state: {{ item.state }}
+    with_items: "{{ containers }}"
+
   - name: Add epel-release repo
     yum:
       name: epel-release
@@ -25,4 +34,8 @@
       name: nginx
       state: started
 
+  - name: get some bash script
+    get_url:
+      url: http://mysqltuner.com/mysqltuner.pl
+      dest: /usr/local/sbin/mysqltuner
 
