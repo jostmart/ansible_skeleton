@@ -26,3 +26,17 @@ Macintosh
     sudo easy_install pip
     sudo pip install ansible
 
+
+## Inventory
+
+### OpenStack
+
+Inventory script included in this repo, from: https://raw.githubusercontent.com/ansible/ansible/devel/contrib/inventory/openstack_inventory.py
+    chmod +x openstack_inventory.py
+
+The script should now be usable
+    ./openstack_inventory.py --list
+
+Check if you can connect to all hosts
+
+    ansible -i openstack_inventory.py all -m ping
