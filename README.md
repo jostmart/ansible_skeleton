@@ -29,6 +29,9 @@ Macintosh
 
 ## Inventory
 
+If the location given to -i in Ansible is a directory (or as so configured in ansible.cfg), Ansible can use multiple inventory sources at the same time. When doing so, it is possible to mix both dynamic and statically managed inventory sources in the same ansible run. Instant hybrid cloud!
+
+
 ### OpenStack
 
 Inventory script included in this repo, from: https://raw.githubusercontent.com/ansible/ansible/devel/contrib/inventory/openstack_inventory.py
