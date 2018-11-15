@@ -10,10 +10,15 @@ To check for already installed Ansible in Ubuntu:
 Output should look something like this:
   `ansible/bionic,bionic,now 2.5.1+dfsg-1 all [installerat]`
 
+
 RHEL and CentOS
+
     RHEL7: $ sudo subsription-manager repos --enable rhel-7-server-ansible-2.5-rpms
     sudo yum install ansible
+
+
 Ubuntu and such
+
     sudo apt install ansible (or apt-get install ansible)
 
 Macintosh
