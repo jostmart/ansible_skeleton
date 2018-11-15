@@ -1,24 +1,2 @@
-# 
-# Mockup of a script
-# The idea is that inventory should be auto generated
-#
 
-
-get_hosts_from_aws {
-
-}
-
-get_hosts_from_siptrack {
-
-}
-
-get_hosts_from_azure {
-
-}
-
-
-get_hosts {
-  get_hosts_from_aws
-  get_hosts_from_siptrack
-  get_hosts_from_azure
-}
+https://docs.ansible.com/ansible/2.7/user_guide/intro_dynamic_inventory.html#using-inventory-directories-and-multiple-inventory-sources
