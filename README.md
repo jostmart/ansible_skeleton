@@ -32,9 +32,11 @@ Macintosh
 ### OpenStack
 
 Inventory script included in this repo, from: https://raw.githubusercontent.com/ansible/ansible/devel/contrib/inventory/openstack_inventory.py
+
     chmod +x openstack_inventory.py
 
 The script should now be usable
+
     ./openstack_inventory.py --list
 
 Check if you can connect to all hosts
