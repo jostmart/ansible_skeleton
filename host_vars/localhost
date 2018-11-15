@@ -1,0 +1,7 @@
+containers:
+  - name: nginx
+    service: nginx
+    template: ubuntu
+    state: started
+    template_options: --release xenial --packages python
+
