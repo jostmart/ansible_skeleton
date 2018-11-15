@@ -22,6 +22,7 @@ Ubuntu and such
     sudo apt install ansible (or apt-get install ansible)
 
 Macintosh
+
     sudo easy_install pip
     sudo pip install ansible
 
