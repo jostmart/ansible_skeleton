@@ -1,0 +1,139 @@
+- hosts: wallscreens
+  tasks:
+    - name: remove password from default user
+      user: name=pi password=!
+
+    - name: set timezone
+      timezone: name=Europe/Oslo
+
+    - name: set locale to en_US.UTF-8
+      locale_gen: name=en_US.UTF-8
+
+    - name: set hostname from dhcp
+      lineinfile: dest=/etc/dhcpcd.conf line="env force_hostname=YES"
+
+    - name: disable use of RFC7217 for IPv6 SLAAC
+      replace: dest=/etc/dhcpcd.conf regexp="slaac private" replace="slaac hwaddr"
+
+    - name: supress boot messages
+      replace: dest=/boot/cmdline.txt regexp='(.* rootwait)$' replace='\1 quiet'
+
+    - name: install packages
+      apt: name={{item}} state=present update_cache=yes cache_valid_time=3600
+      with_items:
+        - chromium-browser
+        - ttf-mscorefonts-installer
+        - unclutter
+        - xinit
+
+    - name: remove packages
+      apt: name={{item}} state=absent purge=yes
+      with_items:
+        - avahi-daemon
+        - bluez
+        - dphys-swapfile
+        - rsyslog
+        - wpasupplicant
+
+    - name: adjust .profile
+      blockinfile:
+        dest: /home/pi/.profile
+        block: |
+          [ -f ~/.autostart -a "$(tty)" == "/dev/tty1" ] && {
+            XAUTHORITY=/tmp/.xauth startx
+          }
+
+    - name: add .xinitrc
+      copy:
+        dest: /home/pi/.xinitrc
+        owner: pi
+        group: pi
+        mode: 0644
+        content: |
+          xset -dpms
+          xset s off
+          xset s noblank
+          unclutter -idle 1 -root &
+          exec chromium-browser --window-size=1920,1080 --no-first-run --noerrdialogs --kiosk --incognito https://wallscreen.i.bitbit.net/$(hostname --short)
+
+    - name: Mount root read-only on boot
+      blockinfile:
+        dest: /etc/rc.local
+        insertbefore: ^exit 0
+        block: |
+          sleep 5
+          mount -o remount,ro /
+
+    - name: automatically login to useraccount on boot
+      file:
+        src: /etc/systemd/system/autologin@.service
+        dest: /etc/systemd/system/getty.target.wants/getty@tty1.service
+        state: link
+
+    - name: autostart Chromium on boot
+      copy: dest=/home/pi/.autostart group=pi owner=pi mode=0644 content=""
+
+    - name: Mount /tmp as tmpfs
+      mount: name=/tmp src=tmpfs fstype=tmpfs opts=mode=1777 state=present
+
+    - name: Mount /var/log on /run/log
+      mount: name=/var/log src=/run/log fstype=none opts=bind state=present
+
+    - name: Mount user config on /tmp
+      mount: name=/home/pi/.config src=/tmp fstype=none opts=bind state=present
+
+    - name: add service to deactivate screenserver
+      copy:
+        dest: /etc/systemd/system/deactivate-screensaver@.service
+        content: |
+          [Unit]
+          Description=Stop screensaver
+          [Service]
+          Type=oneshot
+          User=%I
+          Environment=DISPLAY=:0
+          Environment=XAUTHORITY=/tmp/.xauth
+          ExecStart=/usr/bin/xset s reset
+
+    - name: add timer to deactivate screenserver
+      copy:
+        dest: /etc/systemd/system/deactivate-screensaver.timer
+        content: |
+          [Unit]
+          Description=Turn on screen
+          [Timer]
+          OnCalendar=Mon-Fri 07:00
+          Unit=deactivate-screensaver@pi.service
+          [Install]
+          WantedBy=timers.target
+
+    - name: add service to activate screenserver
+      copy:
+        dest: /etc/systemd/system/activate-screensaver@.service
+        content: |
+          [Unit]
+          Description=Start screensaver
+          [Service]
+          Type=oneshot
+          User=%I
+          Environment=DISPLAY=:0
+          Environment=XAUTHORITY=/tmp/.xauth
+          ExecStart=/usr/bin/xset s activate
+
+    - name: add timer to activate screenserver
+      copy:
+        dest: /etc/systemd/system/activate-screensaver.timer
+        content: |
+          [Unit]
+          Description=Turn off screen
+          [Timer]
+          OnCalendar=Mon-Fri 18:00
+          Unit=activate-screensaver@pi.service
+          [Install]
+          WantedBy=timers.target
+
+    - name: add systemd timers
+      systemd: name={{item}} enabled=yes state=started
+      with_items:
+        - deactivate-screensaver.timer
+        - activate-screensaver.timer
